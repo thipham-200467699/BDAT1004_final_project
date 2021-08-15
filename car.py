@@ -1,4 +1,5 @@
 from db_utilities import DbUtiltity
+from conf import MAX_NUMBER_OF_DISPLAYED_BRANDS
 
 class Car:
     def __init__(self, p_id='', p_year=0, p_brand='', p_model='', p_mileage=0, p_price=0):
@@ -51,3 +52,49 @@ def get_cars_by_filters(criteria):
                 , rec['price']
             ))
     return cars
+
+def get_car_brand_statistics():
+    result = {}
+    
+    with DbUtiltity() as db_util:
+        stats = db_util.get_car_brand_statistics()
+
+        brand_count = 0
+        total_others = 0
+        for stat in stats:
+            if brand_count < MAX_NUMBER_OF_DISPLAYED_BRANDS:
+                result.update({stat['_id']: stat['count']})
+            else:
+                total_others += stat['count']
+            brand_count += 1
+
+        if total_others > 0:
+            result.update({'Others': total_others})
+
+    return result
+
+def get_avg_price_by_brand():
+    result = {}
+    
+    with DbUtiltity() as db_util:
+        stats = db_util.get_avg_price_by_brand()
+
+        brand_count = 0
+        for stat in stats:
+            if brand_count < MAX_NUMBER_OF_DISPLAYED_BRANDS:
+                result.update({stat['_id']: stat['avg_price']})
+            
+            brand_count += 1
+
+    return result
+
+def get_avg_mileage_by_year():
+    result = {}
+    
+    with DbUtiltity() as db_util:
+        stats = db_util.get_avg_mileage_by_year()
+
+        for stat in stats:
+            result.update({str(stat['_id']): stat['avg_mileage']})
+
+    return result

@@ -1,12 +1,14 @@
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
+from bson.son import SON
+from conf import DB_CONNECTION_STRING
 
-DB_CONNECTION_STRING = 'mongodb+srv://admin123:admin123@cluster0.y16pf.mongodb.net/finalproject?retryWrites=true&w=majority'
 
 class DbUtiltity:
 
     def __init__(self):
         self.client = None
+        self.connect_to_db()
 
     def __enter__(self):
         return self
@@ -23,27 +25,48 @@ class DbUtiltity:
         db.cars.drop()
     
     def find_all_cars(self, criteria):
-        if not self.client:
-            self.connect_to_db()
         db = self.client.finalproject
         return db.cars.find(criteria)
     
     def find_one_car(self, criteria):
-        if not self.client:
-            self.connect_to_db()
         db = self.client.finalproject
         return db.cars.find_one(criteria)
 
     def save_cars_to_db(self, cars):
-        if not self.client:
-            self.connect_to_db()
         db = self.client.finalproject
 
         if cars and len(cars) > 0:
             try:
                 db.cars.insert_many(documents=cars, ordered=False)
             except BulkWriteError as e:
-                print(type(e))
+                pass
+
+    def get_car_brand_statistics(self):
+        db = self.client.finalproject
+
+        pipeline = [
+            {"$group": {"_id": "$brand", "count": {"$sum": 1}}},
+            {"$sort": SON([("count", -1)])}
+        ]
+        return list(db.cars.aggregate(pipeline))
+
+    def get_avg_price_by_brand(self):
+        db = self.client.finalproject
+
+        pipeline = [
+            {"$group": {"_id": "$brand", "avg_price": {"$avg": "$price"}}},
+            {"$sort": SON([("avg_price", -1)])}
+        ]
+        return list(db.cars.aggregate(pipeline))
+
+    def get_avg_mileage_by_year(self):
+        db = self.client.finalproject
+
+        pipeline = [
+            {"$group": {"_id": "$year", "avg_mileage": {"$avg": "$mileage"}}},
+            {"$sort": SON([("_id", 1)])}
+        ]
+        return list(db.cars.aggregate(pipeline))
     
     def close_connection(self):
         if self.client:
