@@ -9,29 +9,29 @@ import atexit
 
 app = Flask(__name__, template_folder='Templates')
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=start_data_accquiring, trigger="interval", hours=24)
-scheduler.start()
+#scheduler = BackgroundScheduler()
+#scheduler.add_job(func=start_data_accquiring, trigger="interval", hours=24)
+#scheduler.start()
 
 # Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
+#atexit.register(lambda: scheduler.shutdown())
 
 @app.route('/')
 def index():
     # Get brand statistics
-    brand_statistics = car.get_car_brand_statistics()
+    #brand_statistics = car.get_car_brand_statistics()
     data1 = {'Brands':'Count'}
-    data1.update(brand_statistics)
+    #data1.update(brand_statistics)
 
     # Get average price by car brand
-    price_statistics = car.get_avg_price_by_brand()
+    #price_statistics = car.get_avg_price_by_brand()
     data2 = {'Brands':'Avg_Price'}
-    data2.update(price_statistics)
+    #data2.update(price_statistics)
 
     # Get average mileage by year of manufacture
-    mileage_statistics = car.get_avg_mileage_by_year()
+    #mileage_statistics = car.get_avg_mileage_by_year()
     data3 = {'Year':'Avg_Mileage'}
-    data3.update(mileage_statistics)
+    #data3.update(mileage_statistics)
 
     # build final data
     data = {'brand_statistics': data1
