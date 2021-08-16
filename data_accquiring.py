@@ -35,7 +35,7 @@ def start_data_accquiring():
             total_number_of_cars = int(total_in_str)
             n_tries += 1
         except Exception as e:
-            pass
+            print(e)
 
     #print(f'Total number of cars: {total_number_of_cars}')
 
