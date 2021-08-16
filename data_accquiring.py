@@ -1,31 +1,41 @@
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
+from requests import exceptions
 from conf import USER_AGENT, ROOT_URL
 from db_utilities import DbUtiltity
-import urllib.request
+#import urllib.request
+import requests
 import re
 
 
 def start_data_accquiring():
-    headers = {'User-Agent':USER_AGENT}
-    request = urllib.request.Request(ROOT_URL,None,headers) #The assembled request
-    response = urllib.request.urlopen(request)
-    content = response.read().decode()
+    # headers = {'User-Agent':USER_AGENT}
+    #request = urllib.request.Request(ROOT_URL,None,headers) #The assembled request
+    
+    #response = urllib.request.urlopen(request)
+    
 
-    page_content = BeautifulSoup(content, 'html.parser')
+    
 
     # find total number of cars
     total_number_of_cars = 0
     n_tries = 0
     max_tries = 5
     while total_number_of_cars == 0 and n_tries < max_tries:
-        span_tag = page_content.find('span', attrs={"data-qa":"pagination-text"})
-        pattern = re.compile("(.*)-(.*) of (.*) Results")
-        result = pattern.search(span_tag.get_text())
-        total_in_str = result.group(3).strip()
-        total_number_of_cars = int(total_in_str)
-        n_tries += 1
+        try:
+            response = requests.get(ROOT_URL)
+            content = response.text
+            page_content = BeautifulSoup(content, 'html.parser')
+
+            span_tag = page_content.find('span', attrs={"data-qa":"pagination-text"})
+            pattern = re.compile("(.*)-(.*) of (.*) Results")
+            result = pattern.search(span_tag.get_text())
+            total_in_str = result.group(3).strip()
+            total_number_of_cars = int(total_in_str)
+            n_tries += 1
+        except Exception as e:
+            pass
 
     #print(f'Total number of cars: {total_number_of_cars}')
 
@@ -58,9 +68,9 @@ def process_one_page(current_page):
 
     url_str = f'{ROOT_URL}?page={current_page}'
     headers = {'User-Agent':USER_AGENT}
-    request = urllib.request.Request(url_str,None,headers)
-    response = urllib.request.urlopen(request)
-    content = response.read().decode()
+    response = requests.get(url_str)
+    #response = urllib.request.urlopen(request)
+    content = response.text
 
     page_content = BeautifulSoup(content, 'html.parser')
 
