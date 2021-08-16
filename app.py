@@ -7,7 +7,7 @@ import threading
 import time
 import atexit
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=start_data_accquiring, trigger="interval", hours=24)
