@@ -58,6 +58,16 @@ class DbUtiltity:
             {"$sort": SON([("avg_price", -1)])}
         ]
         return list(db.cars.aggregate(pipeline))
+    
+    def get_avg_price_by_preferred_brand(self, brands):
+        db = self.client.finalproject
+
+        pipeline = [
+            {"$match": {"brand": {"$in":brands}}},
+            {"$group": {"_id": "$brand", "avg_price": {"$avg": "$price"}}},
+            {"$sort": SON([("avg_price", 1)])}
+        ]
+        return list(db.cars.aggregate(pipeline))
 
     def get_avg_mileage_by_year(self):
         db = self.client.finalproject

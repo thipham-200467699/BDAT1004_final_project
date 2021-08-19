@@ -73,6 +73,16 @@ def get_car_brand_statistics():
 
     return result
 
+def get_avg_price_by_preferred_brand(brands):
+    result = {}
+
+    with DbUtiltity() as db_util:
+        stats = db_util.get_avg_price_by_preferred_brand(brands)
+        for stat in stats:
+            result.update({stat['_id']: stat['avg_price']})
+            
+    return result
+
 def get_avg_price_by_brand():
     result = {}
     

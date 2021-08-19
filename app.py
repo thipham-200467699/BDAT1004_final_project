@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 from data_accquiring import start_data_accquiring
+from conf import MAX_NUMBER_OF_DISPLAYED_BRANDS
 from apscheduler.schedulers.background import BackgroundScheduler
 import car
 import sys
@@ -18,15 +19,25 @@ atexit.register(lambda: scheduler.shutdown())
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
     # Get brand statistics
     brand_statistics = car.get_car_brand_statistics()
     data1 = {'Brands':'Count'}
     data1.update(brand_statistics)
 
-    # Get average price by car brand
+    # Get top average price by car brand
     price_statistics = car.get_avg_price_by_brand()
     data2 = {'Brands':'Avg_Price'}
     data2.update(price_statistics)
+
+    # Get average price by preferred car brand
+    preferred_brand = list([k for k in brand_statistics.keys()])[:(MAX_NUMBER_OF_DISPLAYED_BRANDS)]
+    price_statistics_preferred = car.get_avg_price_by_preferred_brand(preferred_brand)
+    data4 = {'Brands':'Avg_Price'}
+    data4.update(price_statistics_preferred)
 
     # Get average mileage by year of manufacture
     mileage_statistics = car.get_avg_mileage_by_year()
@@ -35,7 +46,8 @@ def index():
 
     # build final data
     data = {'brand_statistics': data1
-            , 'price_statistics': data2
+            , 'price_statistics_high': data2
+            , 'price_statistics_preferred': data4
             , 'mileage_statistics': data3}
 
     return render_template('dashboard.html', data=data)
